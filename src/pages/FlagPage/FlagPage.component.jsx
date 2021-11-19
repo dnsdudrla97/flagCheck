@@ -1,12 +1,14 @@
 import React, {useState, Fragment,} from 'react';
-import { connect } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import {sendFlag} from '../../redux/flag/flag.actions';
-import {actionFlag} from '../../redux/flag/flag.reducer';
+import {actionFlag, actionFlagError} from '../../redux/flag/flag.reducer';
+import {setAlert} from '../../redux/alert/alert.actions';
 
 // import './flag.styles.scss';
 
-const FlagPage = ({dispatchAdd, path}) => {
+const FlagPage = ({dispatchAddFlag, dispatchFlagError, path}) => {
+	const dispatch = useDispatch();
 	const [ flagData, setFlagData ] = useState({
 		flag: '',
 	});
@@ -24,11 +26,19 @@ const FlagPage = ({dispatchAdd, path}) => {
 		e.preventDefault();
 		sendFlag({flag}, path)
 			.then(res => {
-				dispatchAdd(res);
+				dispatchAddFlag(res);
 				setFlagData({flag: ''});
 			})
-			.catch(err => err);	// error trigger
+			.catch(err => {
+				dispatchFlagError(err);
+				dispatch(setAlert(String(err), 'danger'));
+			});	// error trigger
 	};
+	const resetOnClick = (e) => {
+		e.preventDefault();
+		setFlagData({flag: ''});
+
+	}
 	return <Fragment>
 		<form
 			onSubmit = {e=>onSubmit(e)}
@@ -43,7 +53,7 @@ const FlagPage = ({dispatchAdd, path}) => {
 				required
 			/>
             	<section className="profile-form-button-action">
-                	<button type="reset" onClick={()=>window.location.replace=`/flag`}>RESET</button>
+                	<button type="reset" onClick={resetOnClick}>RESET</button>
                 	<button type="submit">SUBMIT</button>
             	</section>
         	</form>
@@ -52,7 +62,9 @@ const FlagPage = ({dispatchAdd, path}) => {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
 	return {
-		dispatchAdd: (post) => dispatch(actionFlag(post)),
+		dispatchAddFlag: (post) => dispatch(actionFlag(post)),
+		dispatchFlagError: (err) => dispatch(actionFlagError(err)),
+	
 	}
 }
 export default connect(null, mapDispatchToProps)(FlagPage);

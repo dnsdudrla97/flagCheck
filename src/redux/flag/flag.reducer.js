@@ -1,9 +1,16 @@
-import { GET_FLAG } from "./flag.types";
+import { GET_FLAG, ERROR_FLAG} from "./flag.types";
 
-export const actionFlag = (post) => {
+export const actionFlag = (flag) => {
 	return {
 		type: GET_FLAG,
-		payload: post
+		payload: flag
+	}
+}
+
+export const actionFlagError = (error) => {
+	return {
+		type: ERROR_FLAG,
+		payload: error
 	}
 }
 
@@ -19,7 +26,13 @@ export default function flag(state = initialState, action) {
 		case GET_FLAG:
 			return {
 				...state,
-				flag_result: state.flag_result,
+				flag_result: action.payload,
+				loading: false
+			};
+		case ERROR_FLAG:
+			return {
+				...state,
+				error: action.payload,
 				loading: false
 			};
 		default:
